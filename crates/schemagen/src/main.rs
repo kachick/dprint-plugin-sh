@@ -7,6 +7,7 @@ mod tests {
     #[test]
     fn test_generate_json_schema() {
         let schema = include_str!(concat!(env!("OUT_DIR"), "/schema.json"));
+        assert!(schema.contains(r#""dialect":"#));
         assert!(schema.contains(r#""indentWidth":"#));
         assert!(schema.contains(r#""useTabs":"#));
         assert!(schema.contains(r#""binaryNextLine":"#));
@@ -23,7 +24,7 @@ mod tests {
             serde_json::from_str(include_str!("../../../tests/default/dprint.json")).unwrap();
         assert!(validator.is_valid(&fixture["sh"]));
 
-        let valid = serde_json::json!({ "indentWidth": 4, "useTabs": true });
+        let valid = serde_json::json!({ "dialect": "bash", "indentWidth": 4, "useTabs": true });
         assert!(validator.is_valid(&valid));
 
         let invalid = serde_json::json!({ "unknownKey": "invalid" });

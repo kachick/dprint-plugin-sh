@@ -7,7 +7,7 @@ use dprint_core::plugins::{
 };
 
 pub mod configuration;
-use configuration::Configuration;
+use configuration::{Configuration, Dialect};
 
 #[derive(Default)]
 pub struct ShellPluginHandler;
@@ -38,6 +38,8 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
     ) -> PluginResolveConfigurationResult<Configuration> {
         let mut config = config;
         let mut diagnostics = Vec::new();
+
+        let dialect = get_value(&mut config, "dialect", Dialect::default(), &mut diagnostics);
 
         let indent_width = get_value(
             &mut config,
@@ -75,6 +77,7 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
 
         PluginResolveConfigurationResult {
             config: Configuration {
+                dialect,
                 indent_width,
                 use_tabs,
                 binary_next_line,
@@ -88,8 +91,14 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
             },
             diagnostics,
             file_matching: FileMatchingInfo {
-                file_extensions: vec!["sh".to_string(), "bash".to_string(), "zsh".to_string()],
-                file_names: vec![],
+                file_extensions: vec![
+                    "sh".to_string(),
+                    "bash".to_string(),
+                    "zsh".to_string(),
+                    "ksh".to_string(),
+                    "mksh".to_string(),
+                ],
+                file_names: vec![".envrc".to_string()],
             },
         }
     }
@@ -114,7 +123,16 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
             shuck_formatter::IndentStyle::Space
         };
 
+        // NOTE:
+        // Upstream `shuck-formatter` handles dialect resolution as follows when dialect is Auto:
+        // 1. First line shebang (`#!...`) takes the highest priority.
+        // 2. File extension determines dialect (`.bash` -> Bash, `.zsh` -> Zsh, `.sh` -> Posix, `.mksh` -> Mksh).
+        // 3. Files without extensions or unknown names (like `.envrc`) fallback to Bash.
+        //
+        // Notice that `.sh` files without a shebang default to Posix dialect.
+        // Non-shell file formats such as Makefiles are not supported by upstream.
         let options = shuck_formatter::ShellFormatOptions::default()
+            .with_dialect(request.config.dialect.into())
             .with_indent_style(indent_style)
             .with_indent_width(request.config.indent_width)
             .with_binary_next_line(request.config.binary_next_line)
@@ -163,12 +181,27 @@ mod tests {
         let mut handler = ShellPluginHandler;
         let result = handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
         assert!(result.diagnostics.is_empty());
+        assert_eq!(result.config.dialect, Dialect::Auto);
         assert_eq!(result.config.indent_width, 2);
         assert!(!result.config.use_tabs);
         assert_eq!(
             result.file_matching.file_extensions,
-            vec!["sh", "bash", "zsh"]
+            vec!["sh", "bash", "zsh", "ksh", "mksh"]
         );
+        assert_eq!(result.file_matching.file_names, vec![".envrc"]);
+    }
+
+    #[test]
+    fn test_resolve_config_explicit_dialect() {
+        let mut handler = ShellPluginHandler;
+        let mut config = ConfigKeyMap::new();
+        config.insert(
+            "dialect".to_string(),
+            ConfigKeyValue::String("bash".to_string()),
+        );
+        let result = handler.resolve_config(config, &GlobalConfiguration::default());
+        assert!(result.diagnostics.is_empty());
+        assert_eq!(result.config.dialect, Dialect::Bash);
     }
 
     #[test]
@@ -292,5 +325,75 @@ mod tests {
         assert!(formatted.is_some());
         let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
         assert_eq!(formatted_str, "if true; then\n    echo foo\nfi\n");
+    }
+
+    #[test]
+    fn test_format_sh_file_with_bash_syntax_fails_in_auto_posix_mode() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        // In default Auto mode, .sh without a shebang is parsed as Posix.
+        // `[[ ]]` is not supported in Posix dialect, so this should fail.
+        let input = "if [[ 1 -eq 1 ]]; then\necho foo\nfi\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.sh"),
+            file_bytes: input.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let result = handler.format(request, |_| unreachable!());
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_format_sh_file_with_explicit_bash_dialect_succeeds() {
+        let mut handler = ShellPluginHandler;
+        let mut config = ConfigKeyMap::new();
+        config.insert(
+            "dialect".to_string(),
+            ConfigKeyValue::String("bash".to_string()),
+        );
+        let resolve_result = handler.resolve_config(config, &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let input = "if [[ 1 -eq 1 ]]; then\necho foo\nfi\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.sh"),
+            file_bytes: input.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert!(formatted.is_some());
+        let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
+        assert_eq!(formatted_str, "if [[ 1 -eq 1 ]]; then\n  echo foo\nfi\n");
+    }
+
+    #[test]
+    fn test_format_envrc_file() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let input = "if [[ -f .env ]]; then\nexport   FOO=bar\nfi\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from(".envrc"),
+            file_bytes: input.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert!(formatted.is_some());
+        let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str,
+            "if [[ -f .env ]]; then\n  export FOO=bar\nfi\n"
+        );
     }
 }
