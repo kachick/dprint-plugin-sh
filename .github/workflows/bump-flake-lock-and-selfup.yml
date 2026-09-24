@@ -1,0 +1,14 @@
+name: 🔄
+on:
+  schedule:
+    # Every 10:17 JST on Monday
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron: '17 1 1 * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    uses: kachick/selfup/.github/workflows/reusable-bump-flake-lock-and-selfup.yml@06a37ddb70ce25ec28b75ce500e15e7fb4d7c4a9 # v1.3.1

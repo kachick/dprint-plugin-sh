@@ -1,0 +1,83 @@
+# https://taskfile.dev
+
+version: '3'
+
+env:
+  # If test for nix product: `PLUGIN_PATH="$PWD/result/lib/plugin.wasm" task`
+  PLUGIN_PATH: '{{.USER_WORKING_DIR}}/target/wasm32-unknown-unknown/debug/dprint_plugin_sh.wasm'
+
+tasks:
+  default:
+    deps:
+      - check
+      - test
+  build: # Prefer cargo cache rather than go-task cache feature
+    env:
+      SKIP_BUILD: 'false' # Don't use "$CI" for this purpose
+      CARGO_BUILD_TARGET: 'wasm32-unknown-unknown'
+    status:
+      - |
+        [ "$SKIP_BUILD" == 'true' ]
+    cmds:
+      # Omit "--release" for development purpose. Release assets should use `nix build`
+      - cargo build
+  check:
+    deps:
+      - test
+      - lint
+  test:
+    deps:
+      - test-unit
+      - test-e2e
+  test-unit:
+    env:
+      SKIP_BUILD: 'false'
+    status:
+      - |
+        [ "$SKIP_BUILD" == 'true' ]
+    cmds:
+      - cargo test --workspace
+  test-e2e:
+    deps:
+      - test-e2e-default
+      - test-e2e-all
+      - test-e2e-with_global_config
+  test-e2e-*:
+    deps:
+      - build
+    vars:
+      TESTNAME: '{{index .MATCH 0}}'
+    cmds:
+      - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.nix
+      - cd 'tests/{{.TESTNAME}}' && diff <(cat ../raw.nix | dprint fmt --stdin ../raw.nix --plugins="$PLUGIN_PATH") expected.nix
+  bump-fixtures-*:
+    deps:
+      - build
+    vars:
+      TESTNAME: '{{index .MATCH 0}}'
+    cmds:
+      - cd 'tests/{{.TESTNAME}}' && cat ../raw.nix | dprint fmt --stdin ../raw.nix --plugins="$PLUGIN_PATH" > expected.nix
+  bump-fixtures:
+    deps:
+      - bump-fixtures-default
+      - bump-fixtures-all
+      - bump-fixtures-with_global_config
+  fmt:
+    cmds:
+      - cargo fmt
+      - dprint fmt
+  lint:
+    cmds:
+      - cargo clippy -- --deny warnings
+      - cargo fmt --check
+      - dprint check
+      - typos . .github .vscode
+      - zizmor .
+      - git ls-files '*.nix' | xargs nixf-diagnose
+      - git ls-files | xargs nix run github:kachick/selfup/v1.3.1 -- list -check
+  schema:
+    cmds:
+      - cargo run --package schemagen
+  selfup:
+    cmds:
+      - git ls-files | xargs nix run github:kachick/selfup/v1.3.1 -- run
