@@ -96,15 +96,15 @@ dprint add markdown
 {
   "markdown": {
     "tags": {
+      "shell": "sh",
       "sh": "sh",
+      "shell-script": "sh",
       "bash": "sh",
       "zsh": "sh",
-      "shell": "sh",
-      "shellscript": "sh",
-      "shell-script": "sh",
-      "ksh": "sh",
-      "dash": "sh"
+      "envrc": "sh"
     }
   }
 }
 ```
+
+This list satisfies linguist [mapping](https://github.com/github-linguist/linguist/blob/90fe0515940a5192980b2545c33ec59ef9fef17b/lib/linguist/languages.yml#L7468-L7476).
