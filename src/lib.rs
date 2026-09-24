@@ -97,6 +97,8 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
                     "zsh".to_string(),
                     "ksh".to_string(),
                     "mksh".to_string(),
+                    "dash".to_string(),
+                    "bats".to_string(),
                 ],
                 file_names: vec![".envrc".to_string()],
             },
@@ -186,7 +188,7 @@ mod tests {
         assert!(!result.config.use_tabs);
         assert_eq!(
             result.file_matching.file_extensions,
-            vec!["sh", "bash", "zsh", "ksh", "mksh"]
+            vec!["sh", "bash", "zsh", "ksh", "mksh", "dash", "bats"]
         );
         assert_eq!(result.file_matching.file_names, vec![".envrc"]);
     }
@@ -394,6 +396,30 @@ mod tests {
         assert_eq!(
             formatted_str,
             "if [[ -f .env ]]; then\n  export FOO=bar\nfi\n"
+        );
+    }
+
+    #[test]
+    fn test_format_sh_file_with_bash_shebang_succeeds_in_auto_mode() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let input = "#!/usr/bin/env bash\nif [[ 1 -eq 1 ]]; then\necho foo\nfi\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.sh"),
+            file_bytes: input.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert!(formatted.is_some());
+        let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str,
+            "#!/usr/bin/env bash\nif [[ 1 -eq 1 ]]; then\n  echo foo\nfi\n"
         );
     }
 }

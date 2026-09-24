@@ -39,7 +39,7 @@ impl FromStr for Dialect {
         match s {
             "auto" => Ok(Dialect::Auto),
             "bash" => Ok(Dialect::Bash),
-            "posix" => Ok(Dialect::Posix),
+            "posix" | "sh" | "dash" | "ksh" => Ok(Dialect::Posix),
             "mksh" => Ok(Dialect::Mksh),
             "zsh" => Ok(Dialect::Zsh),
             _ => Err(ParseDialectError(s.to_string())),
@@ -110,6 +110,9 @@ mod tests {
         assert_eq!("auto".parse::<Dialect>(), Ok(Dialect::Auto));
         assert_eq!("bash".parse::<Dialect>(), Ok(Dialect::Bash));
         assert_eq!("posix".parse::<Dialect>(), Ok(Dialect::Posix));
+        assert_eq!("sh".parse::<Dialect>(), Ok(Dialect::Posix));
+        assert_eq!("dash".parse::<Dialect>(), Ok(Dialect::Posix));
+        assert_eq!("ksh".parse::<Dialect>(), Ok(Dialect::Posix));
         assert_eq!("mksh".parse::<Dialect>(), Ok(Dialect::Mksh));
         assert_eq!("zsh".parse::<Dialect>(), Ok(Dialect::Zsh));
         let err = "unknown".parse::<Dialect>().unwrap_err();

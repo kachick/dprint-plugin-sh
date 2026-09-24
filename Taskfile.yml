@@ -42,26 +42,40 @@ tasks:
       - test-e2e-default
       - test-e2e-all
       - test-e2e-with_global_config
+      - test-e2e-bash
+      - test-e2e-zsh
+      - test-e2e-envrc
   test-e2e-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.sh
-      - cd 'tests/{{.TESTNAME}}' && diff <(cat ../raw.sh | dprint fmt --stdin ../raw.sh --plugins="$PLUGIN_PATH") expected.sh
+      - |
+        cd 'tests/{{.TESTNAME}}'
+        target_file="$(ls expected.* .envrc 2>/dev/null | head -n 1)"
+        raw_file="$(ls raw.* 2>/dev/null || echo ../raw.sh)"
+        dprint check --plugins="$PLUGIN_PATH" "$target_file"
+        diff <(cat "$raw_file" | dprint fmt --stdin "$target_file" --plugins="$PLUGIN_PATH") "$target_file"
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && cat ../raw.sh | dprint fmt --stdin ../raw.sh --plugins="$PLUGIN_PATH" > expected.sh
+      - |
+        cd 'tests/{{.TESTNAME}}'
+        target_file="$(ls expected.* .envrc 2>/dev/null | head -n 1)"
+        raw_file="$(ls raw.* 2>/dev/null || echo ../raw.sh)"
+        cat "$raw_file" | dprint fmt --stdin "$target_file" --plugins="$PLUGIN_PATH" > "$target_file"
   bump-fixtures:
     deps:
       - bump-fixtures-default
       - bump-fixtures-all
       - bump-fixtures-with_global_config
+      - bump-fixtures-bash
+      - bump-fixtures-zsh
+      - bump-fixtures-envrc
   fmt:
     cmds:
       - cargo fmt

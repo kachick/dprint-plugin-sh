@@ -41,40 +41,40 @@ Customize if necessary
 
 ### Options
 
-| Option             | Type    | Default  | Description                                                     |
-| ------------------ | ------- | -------- | --------------------------------------------------------------- |
-| `dialect`          | string  | `"auto"` | Shell dialect: `"auto"`, `"bash"`, `"posix"`, `"mksh"`, `"zsh"` |
-| `indentWidth`      | number  | `2`      | Number of spaces for indent. Inherits global config if not set. |
-| `useTabs`          | boolean | `false`  | Indent with tabs. Inherits global config if not set.            |
-| `binaryNextLine`   | boolean | `false`  | Put binary operators (like `&&`) at start of next line.         |
-| `switchCaseIndent` | boolean | `false`  | Indent `case` patterns.                                         |
-| `spaceRedirects`   | boolean | `false`  | Put a space after redirect operators (like `> file`).           |
-| `keepPadding`      | boolean | `false`  | Keep column padding.                                            |
-| `functionNextLine` | boolean | `false`  | Put function `{` on next line.                                  |
-| `neverSplit`       | boolean | `false`  | Keep code on one line where possible.                           |
-| `simplify`         | boolean | `false`  | Simplify code before format.                                    |
-| `minify`           | boolean | `false`  | Make code small.                                                |
+| Option             | Type    | Default  | Description                                                                           |
+| ------------------ | ------- | -------- | ------------------------------------------------------------------------------------- |
+| `dialect`          | string  | `"auto"` | Shell dialect: `"auto"`, `"bash"`, `"posix"`, `"mksh"`, `"zsh"`.                      |
+| `indentWidth`      | number  | `2`      | Number of spaces for indent. Inherits global config if not set.                       |
+| `useTabs`          | boolean | `false`  | Indent with tabs. Inherits global config if not set.                                  |
+| `binaryNextLine`   | boolean | `false`  | Put binary operators (`&&`, `\|\|`, `\|`) at start of next line instead of end.       |
+| `switchCaseIndent` | boolean | `false`  | Indent `case` pattern arms under the `case` statement.                                |
+| `spaceRedirects`   | boolean | `false`  | Put a space between redirect operators and target (e.g. `> file` instead of `>file`). |
+| `keepPadding`      | boolean | `false`  | Keep column alignment spaces between tokens.                                          |
+| `functionNextLine` | boolean | `false`  | Put function opening brace `{` on a new line (Allman style).                          |
+| `neverSplit`       | boolean | `false`  | Keep statements on a single line where possible.                                      |
+| `simplify`         | boolean | `false`  | Rewrite redundant syntax to simpler forms (e.g. `${foo}` to `$foo`).                  |
+| `minify`           | boolean | `false`  | Remove comments and extra whitespace to make code small.                              |
 
 ### Dialect Resolution
 
 When `dialect` is `"auto"` (default), this plugin chooses the dialect in this order:
 
-1. **Shebang**: Reads the first line `#!...` (e.g., `#!/bin/bash` -> Bash, `#!/usr/bin/env zsh` -> Zsh).
+1. **Shebang**: Reads the first line `#!...` (e.g., `#!/usr/bin/env bash` -> Bash, `#!/usr/bin/env zsh` -> Zsh).
 2. **File extension**:
-   - `.bash` -> Bash
+   - `.bash`, `.bats` -> Bash
    - `.zsh` -> Zsh
-   - `.sh` -> Posix
+   - `.sh`, `.dash`, `.ksh` -> Posix
    - `.mksh` -> Mksh
 3. **Fallback**: Files without an extension (like `.envrc`) default to Bash.
 
 > [!NOTE]
 > `.sh` files without a shebang resolve to `posix` by default.
 > If your `.sh` file uses Bash syntax (such as `[[ ]]`), parsing will fail in `posix` mode.
-> To fix this, set `"dialect": "bash"` in your configuration or add a `#!/bin/bash` shebang line.
+> To fix this, set `"dialect": "bash"` in your configuration or add a `#!/usr/bin/env bash` shebang line.
 
 ### Supported Files
 
-- File extensions: `.sh`, `.bash`, `.zsh`, `.ksh`, `.mksh`
+- File extensions: `.sh`, `.bash`, `.zsh`, `.ksh`, `.mksh`, `.dash`, `.bats`
 - File names: `.envrc`
 
 Non-shell files such as `Makefile` are not supported.
@@ -92,9 +92,13 @@ dprint add markdown
   "markdown": {
     "tags": {
       "sh": "sh",
-      "shellscript": "sh",
       "bash": "sh",
-      "zsh": "sh"
+      "zsh": "sh",
+      "shell": "sh",
+      "shellscript": "sh",
+      "shell-script": "sh",
+      "ksh": "sh",
+      "dash": "sh"
     }
   }
 }
