@@ -48,15 +48,15 @@ tasks:
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.nix
-      - cd 'tests/{{.TESTNAME}}' && diff <(cat ../raw.nix | dprint fmt --stdin ../raw.nix --plugins="$PLUGIN_PATH") expected.nix
+      - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.sh
+      - cd 'tests/{{.TESTNAME}}' && diff <(cat ../raw.sh | dprint fmt --stdin ../raw.sh --plugins="$PLUGIN_PATH") expected.sh
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && cat ../raw.nix | dprint fmt --stdin ../raw.nix --plugins="$PLUGIN_PATH" > expected.nix
+      - cd 'tests/{{.TESTNAME}}' && cat ../raw.sh | dprint fmt --stdin ../raw.sh --plugins="$PLUGIN_PATH" > expected.sh
   bump-fixtures:
     deps:
       - bump-fixtures-default

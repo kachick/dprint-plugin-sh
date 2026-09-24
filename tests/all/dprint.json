@@ -1,6 +1,14 @@
 {
-  "nix": {
+  "sh": {
+    "binaryNextLine": true,
+    "functionNextLine": true,
     "indentWidth": 4,
-    "lineWidth": 40
+    "keepPadding": true,
+    "minify": false,
+    "neverSplit": false,
+    "simplify": false,
+    "spaceRedirects": true,
+    "switchCaseIndent": true,
+    "useTabs": false
   }
 }
