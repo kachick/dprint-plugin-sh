@@ -24,11 +24,34 @@ Customize if necessary
 ```json
 {
   "sh": {
-    "lineWidth": 100,
-    "indentWidth": 2
+    "indentWidth": 2,
+    "useTabs": false,
+    "binaryNextLine": false,
+    "switchCaseIndent": false,
+    "spaceRedirects": false,
+    "keepPadding": false,
+    "functionNextLine": false,
+    "neverSplit": false,
+    "simplify": false,
+    "minify": false
   }
 }
 ```
+
+### Options
+
+| Option             | Type    | Default | Description                                                     |
+| ------------------ | ------- | ------- | --------------------------------------------------------------- |
+| `indentWidth`      | number  | `2`     | Number of spaces for indent. Inherits global config if not set. |
+| `useTabs`          | boolean | `false` | Indent with tabs. Inherits global config if not set.            |
+| `binaryNextLine`   | boolean | `false` | Put binary operators (like `&&`) at start of next line.         |
+| `switchCaseIndent` | boolean | `false` | Indent `case` patterns.                                         |
+| `spaceRedirects`   | boolean | `false` | Put a space after redirect operators (like `> file`).           |
+| `keepPadding`      | boolean | `false` | Keep column padding.                                            |
+| `functionNextLine` | boolean | `false` | Put function `{` on next line.                                  |
+| `neverSplit`       | boolean | `false` | Keep code on one line where possible.                           |
+| `simplify`         | boolean | `false` | Simplify code before format.                                    |
+| `minify`           | boolean | `false` | Make code small.                                                |
 
 ## Tips
 
