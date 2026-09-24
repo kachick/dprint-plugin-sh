@@ -86,22 +86,29 @@ Non-shell files such as `Makefile` are not supported.
 
 ## Tips
 
-To format code block in markdown, use `tags` option in official markdown plugin
+To format code blocks in markdown, use the `tags` option in the official markdown plugin:
 
 ```bash
 dprint add markdown
 ```
 
+In `tags`:
+
+- **Key**: The code block language tag in Markdown (e.g. `bash`).
+- **Value**: The target file extension (without a period) that tells this plugin how to format the code.
+
+For example, `.envrc` is a file name, not an extension. So map `"envrc"` to `"bash"`.
+
 ```json
 {
   "markdown": {
     "tags": {
-      "shell": "sh",
       "sh": "sh",
-      "shell-script": "sh",
-      "bash": "sh",
-      "zsh": "sh",
-      "envrc": "sh"
+      "bash": "bash",
+      "zsh": "zsh",
+      "envrc": "bash",
+      "shell": "sh",
+      "shell-script": "sh"
     }
   }
 }
