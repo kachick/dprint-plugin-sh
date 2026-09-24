@@ -51,23 +51,14 @@ tasks:
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - |
-        cd 'tests/{{.TESTNAME}}'
-        target_file="$(ls expected.* .envrc 2>/dev/null | head -n 1)"
-        raw_file="$(ls raw.* 2>/dev/null || echo ../raw.sh)"
-        dprint check --plugins="$PLUGIN_PATH" "$target_file"
-        diff <(cat "$raw_file" | dprint fmt --stdin "$target_file" --plugins="$PLUGIN_PATH") "$target_file"
+      - ./scripts/e2e.bash check '{{.TESTNAME}}'
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - |
-        cd 'tests/{{.TESTNAME}}'
-        target_file="$(ls expected.* .envrc 2>/dev/null | head -n 1)"
-        raw_file="$(ls raw.* 2>/dev/null || echo ../raw.sh)"
-        cat "$raw_file" | dprint fmt --stdin "$target_file" --plugins="$PLUGIN_PATH" > "$target_file"
+      - ./scripts/e2e.bash bump '{{.TESTNAME}}'
   bump-fixtures:
     deps:
       - bump-fixtures-default
