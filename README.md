@@ -75,7 +75,12 @@ When `dialect` is `"auto"` (default), this plugin chooses the dialect in this or
 ### Supported Files
 
 - File extensions: `.sh`, `.bash`, `.zsh`, `.ksh`, `.mksh`, `.dash`, `.bats`
-- File names: `.envrc`
+- File names: `.envrc`, `.bashrc`, `.bash_profile`, `.bash_aliases`, `.bash_logout`, `.profile`, `.zshrc`, `.zshenv`, `.zprofile`, `.zlogin`, `.zlogout`
+
+> [!WARNING]
+> Upstream `shuck-formatter` only infers dialects from shebangs and file extensions, falling back to Bash for extensionless files.
+> This plugin bridges this gap by detecting known Zsh dotfiles (like `.zshrc`) and passing `zsh` dialect upstream.
+> This workaround is heuristic. If you encounter unexpected formatting behavior, set `"dialect": "zsh"` explicitly.
 
 Non-shell files such as `Makefile` are not supported.
 

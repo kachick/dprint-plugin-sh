@@ -100,7 +100,19 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
                     "dash".to_string(),
                     "bats".to_string(),
                 ],
-                file_names: vec![".envrc".to_string()],
+                file_names: vec![
+                    ".envrc".to_string(),
+                    ".bashrc".to_string(),
+                    ".bash_profile".to_string(),
+                    ".bash_aliases".to_string(),
+                    ".bash_logout".to_string(),
+                    ".profile".to_string(),
+                    ".zshrc".to_string(),
+                    ".zshenv".to_string(),
+                    ".zprofile".to_string(),
+                    ".zlogin".to_string(),
+                    ".zlogout".to_string(),
+                ],
             },
         }
     }
@@ -125,16 +137,10 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
             shuck_formatter::IndentStyle::Space
         };
 
-        // NOTE:
-        // Upstream `shuck-formatter` handles dialect resolution as follows when dialect is Auto:
-        // 1. First line shebang (`#!...`) takes the highest priority.
-        // 2. File extension determines dialect (`.bash` -> Bash, `.zsh` -> Zsh, `.sh` -> Posix, `.mksh` -> Mksh).
-        // 3. Files without extensions or unknown names (like `.envrc`) fallback to Bash.
-        //
-        // Notice that `.sh` files without a shebang default to Posix dialect.
-        // Non-shell file formats such as Makefiles are not supported by upstream.
+        let dialect = resolve_dialect(request.config.dialect, text, request.file_path);
+
         let options = shuck_formatter::ShellFormatOptions::default()
-            .with_dialect(request.config.dialect.into())
+            .with_dialect(dialect)
             .with_indent_style(indent_style)
             .with_indent_width(request.config.indent_width)
             .with_binary_next_line(request.config.binary_next_line)
@@ -161,6 +167,32 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
     ) -> Result<Vec<dprint_core::plugins::ConfigChange>, FormatError> {
         Ok(Vec::new())
     }
+}
+
+fn resolve_dialect(
+    configured: Dialect,
+    source: &str,
+    file_path: &std::path::Path,
+) -> shuck_formatter::ShellDialect {
+    if configured != Dialect::Auto {
+        return configured.into();
+    }
+
+    // When the first line has a shebang, let upstream determine the dialect.
+    if source.starts_with("#!") {
+        return shuck_formatter::ShellDialect::Auto;
+    }
+
+    // Upstream `shuck-formatter` falls back to Bash for extensionless files.
+    // We help detect known zsh dotfiles when no shebang exists.
+    if matches!(
+        file_path.file_name().and_then(|n| n.to_str()),
+        Some(".zshrc" | ".zshenv" | ".zprofile" | ".zlogin" | ".zlogout")
+    ) {
+        return shuck_formatter::ShellDialect::Zsh;
+    }
+
+    shuck_formatter::ShellDialect::Auto
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -190,7 +222,22 @@ mod tests {
             result.file_matching.file_extensions,
             vec!["sh", "bash", "zsh", "ksh", "mksh", "dash", "bats"]
         );
-        assert_eq!(result.file_matching.file_names, vec![".envrc"]);
+        assert_eq!(
+            result.file_matching.file_names,
+            vec![
+                ".envrc",
+                ".bashrc",
+                ".bash_profile",
+                ".bash_aliases",
+                ".bash_logout",
+                ".profile",
+                ".zshrc",
+                ".zshenv",
+                ".zprofile",
+                ".zlogin",
+                ".zlogout",
+            ]
+        );
     }
 
     #[test]
@@ -421,5 +468,47 @@ mod tests {
             formatted_str,
             "#!/usr/bin/env bash\nif [[ 1 -eq 1 ]]; then\n  echo foo\nfi\n"
         );
+    }
+
+    #[test]
+    fn test_format_zshrc_without_shebang() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let input = "repeat 2 {\nprint hi\n}\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from(".zshrc"),
+            file_bytes: input.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert!(formatted.is_some());
+        let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
+        assert_eq!(formatted_str, "repeat 2 {\n  print hi\n}\n");
+    }
+
+    #[test]
+    fn test_format_bashrc_without_shebang() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let input = "array=( \"one\" \"two\" )\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from(".bashrc"),
+            file_bytes: input.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert!(formatted.is_some());
+        let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
+        assert_eq!(formatted_str, "array=(\"one\" \"two\")\n");
     }
 }
