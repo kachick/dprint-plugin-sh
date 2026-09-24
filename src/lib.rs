@@ -38,40 +38,86 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
     ) -> PluginResolveConfigurationResult<Configuration> {
         let mut config = config;
         let mut diagnostics = Vec::new();
+        let default_config = Configuration::default();
 
-        let dialect = get_value(&mut config, "dialect", Dialect::default(), &mut diagnostics);
+        let dialect = get_value(
+            &mut config,
+            "dialect",
+            default_config.dialect,
+            &mut diagnostics,
+        );
 
         let indent_width = get_value(
             &mut config,
             "indentWidth",
-            global_config.indent_width.unwrap_or(2),
+            global_config
+                .indent_width
+                .unwrap_or(default_config.indent_width),
             &mut diagnostics,
         );
 
         let use_tabs = get_value(
             &mut config,
             "useTabs",
-            global_config.use_tabs.unwrap_or(false),
+            global_config.use_tabs.unwrap_or(default_config.use_tabs),
             &mut diagnostics,
         );
 
-        let binary_next_line = get_value(&mut config, "binaryNextLine", false, &mut diagnostics);
+        let binary_next_line = get_value(
+            &mut config,
+            "binaryNextLine",
+            default_config.binary_next_line,
+            &mut diagnostics,
+        );
 
-        let switch_case_indent =
-            get_value(&mut config, "switchCaseIndent", false, &mut diagnostics);
+        let switch_case_indent = get_value(
+            &mut config,
+            "switchCaseIndent",
+            default_config.switch_case_indent,
+            &mut diagnostics,
+        );
 
-        let space_redirects = get_value(&mut config, "spaceRedirects", false, &mut diagnostics);
+        let space_redirects = get_value(
+            &mut config,
+            "spaceRedirects",
+            default_config.space_redirects,
+            &mut diagnostics,
+        );
 
-        let keep_padding = get_value(&mut config, "keepPadding", false, &mut diagnostics);
+        let keep_padding = get_value(
+            &mut config,
+            "keepPadding",
+            default_config.keep_padding,
+            &mut diagnostics,
+        );
 
-        let function_next_line =
-            get_value(&mut config, "functionNextLine", false, &mut diagnostics);
+        let function_next_line = get_value(
+            &mut config,
+            "functionNextLine",
+            default_config.function_next_line,
+            &mut diagnostics,
+        );
 
-        let never_split = get_value(&mut config, "neverSplit", false, &mut diagnostics);
+        let never_split = get_value(
+            &mut config,
+            "neverSplit",
+            default_config.never_split,
+            &mut diagnostics,
+        );
 
-        let simplify = get_value(&mut config, "simplify", false, &mut diagnostics);
+        let simplify = get_value(
+            &mut config,
+            "simplify",
+            default_config.simplify,
+            &mut diagnostics,
+        );
 
-        let minify = get_value(&mut config, "minify", false, &mut diagnostics);
+        let minify = get_value(
+            &mut config,
+            "minify",
+            default_config.minify,
+            &mut diagnostics,
+        );
 
         diagnostics.extend(get_unknown_property_diagnostics(config));
 

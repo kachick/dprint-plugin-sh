@@ -18,6 +18,30 @@ mod tests {
         assert!(!schema.contains(r#""required":"#));
 
         let schema_value: serde_json::Value = serde_json::from_str(schema).unwrap();
+        assert_eq!(schema_value["properties"]["dialect"]["default"], "auto");
+        assert_eq!(schema_value["properties"]["indentWidth"]["default"], 2);
+        assert_eq!(schema_value["properties"]["useTabs"]["default"], false);
+        assert_eq!(
+            schema_value["properties"]["binaryNextLine"]["default"],
+            false
+        );
+        assert_eq!(
+            schema_value["properties"]["switchCaseIndent"]["default"],
+            false
+        );
+        assert_eq!(
+            schema_value["properties"]["spaceRedirects"]["default"],
+            false
+        );
+        assert_eq!(schema_value["properties"]["keepPadding"]["default"], false);
+        assert_eq!(
+            schema_value["properties"]["functionNextLine"]["default"],
+            false
+        );
+        assert_eq!(schema_value["properties"]["neverSplit"]["default"], false);
+        assert_eq!(schema_value["properties"]["simplify"]["default"], false);
+        assert_eq!(schema_value["properties"]["minify"]["default"], false);
+
         let validator = jsonschema::validator_for(&schema_value).expect("valid JSON Schema");
 
         let fixture: serde_json::Value =

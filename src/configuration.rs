@@ -79,6 +79,24 @@ pub struct Configuration {
     pub minify: bool,
 }
 
+impl Default for Configuration {
+    fn default() -> Self {
+        Self {
+            dialect: Dialect::default(),
+            indent_width: 2,
+            use_tabs: false,
+            binary_next_line: false,
+            switch_case_indent: false,
+            space_redirects: false,
+            keep_padding: false,
+            function_next_line: false,
+            never_split: false,
+            simplify: false,
+            minify: false,
+        }
+    }
+}
+
 #[cfg(feature = "schema")]
 #[must_use]
 pub fn generate_json_schema() -> String {
@@ -97,6 +115,18 @@ pub fn generate_json_schema() -> String {
             "additionalProperties".to_string(),
             serde_json::Value::Bool(false),
         );
+
+        if let Some(properties) = obj.get_mut("properties").and_then(|p| p.as_object_mut()) {
+            if let Ok(serde_json::Value::Object(defaults)) =
+                serde_json::to_value(Configuration::default())
+            {
+                for (key, default_val) in defaults {
+                    if let Some(prop) = properties.get_mut(&key).and_then(|p| p.as_object_mut()) {
+                        prop.insert("default".to_string(), default_val);
+                    }
+                }
+            }
+        }
     }
     serde_json::to_string_pretty(&schema).unwrap()
 }
@@ -120,5 +150,21 @@ mod tests {
             err.to_string(),
             "Invalid dialect: 'unknown'. Expected 'auto', 'bash', 'posix', 'mksh', or 'zsh'."
         );
+    }
+
+    #[test]
+    fn test_configuration_default() {
+        let default_config = Configuration::default();
+        assert_eq!(default_config.dialect, Dialect::Auto);
+        assert_eq!(default_config.indent_width, 2);
+        assert!(!default_config.use_tabs);
+        assert!(!default_config.binary_next_line);
+        assert!(!default_config.switch_case_indent);
+        assert!(!default_config.space_redirects);
+        assert!(!default_config.keep_padding);
+        assert!(!default_config.function_next_line);
+        assert!(!default_config.never_split);
+        assert!(!default_config.simplify);
+        assert!(!default_config.minify);
     }
 }
