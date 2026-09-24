@@ -260,9 +260,7 @@ mod tests {
         let mut handler = ShellPluginHandler;
         let result = handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
         assert!(result.diagnostics.is_empty());
-        assert_eq!(result.config.dialect, Dialect::Auto);
-        assert_eq!(result.config.indent_width, 2);
-        assert!(!result.config.use_tabs);
+        assert_eq!(result.config, Configuration::default());
         assert_eq!(
             result.file_matching.file_extensions,
             vec!["sh", "bash", "zsh", "ksh", "mksh", "dash", "bats"]

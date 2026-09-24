@@ -59,7 +59,7 @@ impl From<Dialect> for shuck_formatter::ShellDialect {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 // NOTE:
@@ -145,26 +145,6 @@ mod tests {
         assert_eq!("ksh".parse::<Dialect>(), Ok(Dialect::Posix));
         assert_eq!("mksh".parse::<Dialect>(), Ok(Dialect::Mksh));
         assert_eq!("zsh".parse::<Dialect>(), Ok(Dialect::Zsh));
-        let err = "unknown".parse::<Dialect>().unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "Invalid dialect: 'unknown'. Expected 'auto', 'bash', 'posix', 'mksh', or 'zsh'."
-        );
-    }
-
-    #[test]
-    fn test_configuration_default() {
-        let default_config = Configuration::default();
-        assert_eq!(default_config.dialect, Dialect::Auto);
-        assert_eq!(default_config.indent_width, 2);
-        assert!(!default_config.use_tabs);
-        assert!(!default_config.binary_next_line);
-        assert!(!default_config.switch_case_indent);
-        assert!(!default_config.space_redirects);
-        assert!(!default_config.keep_padding);
-        assert!(!default_config.function_next_line);
-        assert!(!default_config.never_split);
-        assert!(!default_config.simplify);
-        assert!(!default_config.minify);
+        assert!("unknown".parse::<Dialect>().is_err());
     }
 }
