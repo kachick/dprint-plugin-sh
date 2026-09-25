@@ -1,6 +1,6 @@
 # dprint-plugin-sh
 
-[![npm version](https://img.shields.io/npm/v/@kachick/dprint-plugin-sh.svg)](https://www.npmjs.com/package/@kachick/dprint-plugin-sh)
+[![npm version](https://img.shields.io/npm/v/@kachick/dprint-plugin-sh.svg)](https://www.npmjs.com/package/@kachick/dprint-plugin-sh) [![CI - Nix Status](https://github.com/kachick/dprint-plugin-sh/actions/workflows/nix.yml/badge.svg?branch=main)](https://github.com/kachick/dprint-plugin-sh/actions/workflows/nix.yml?query=branch%3Amain+)
 
 [dprint](https://dprint.dev/) WASM plugin for Shell Scripts using [shuck-formatter](https://crates.io/crates/shuck-formatter).
 
