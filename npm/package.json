@@ -1,6 +1,6 @@
 {
   "name": "@kachick/dprint-plugin-sh",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "dprint plugin for Shell formatting using shuck-formatter",
   "keywords": [
     "sh",
