@@ -81,8 +81,9 @@ pub struct Configuration {
 
 impl Default for Configuration {
     fn default() -> Self {
-        // Delegate defaults directly to upstream `shuck-formatter` (matching shfmt defaults like tabs).
-        // Users can override them with dprint configurations if needed.
+        // NOTE:
+        // Always use defaults from the `shuck-formatter` crate to keep this plugin simple,
+        // even if defaults between shfmt and shuck-formatter differ in the future.
         let default_shuck = shuck_formatter::ShellFormatOptions::default();
         Self {
             dialect: Dialect::default(),

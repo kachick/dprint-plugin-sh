@@ -25,8 +25,8 @@ Customize if necessary
 {
   "sh": {
     "dialect": "auto",
-    "indentWidth": 2,
-    "useTabs": false,
+    "indentWidth": 8,
+    "useTabs": true,
     "binaryNextLine": false,
     "switchCaseIndent": false,
     "spaceRedirects": false,
@@ -41,11 +41,14 @@ Customize if necessary
 
 ### Options
 
+This plugin directly uses default options from the upstream `shuck-formatter` crate.
+Current defaults are shown below:
+
 | Option             | Type    | Default  | Description                                                                           |
 | ------------------ | ------- | -------- | ------------------------------------------------------------------------------------- |
 | `dialect`          | string  | `"auto"` | Shell dialect: `"auto"`, `"bash"`, `"posix"`, `"mksh"`, `"zsh"`.                      |
-| `indentWidth`      | number  | `2`      | Number of spaces for indent. Inherits global config if not set.                       |
-| `useTabs`          | boolean | `false`  | Indent with tabs. Inherits global config if not set.                                  |
+| `indentWidth`      | number  | `8`      | Number of spaces for indent. Inherits global config if not set.                       |
+| `useTabs`          | boolean | `true`   | Indent with tabs. Inherits global config if not set.                                  |
 | `binaryNextLine`   | boolean | `false`  | Put binary operators (`&&`, `\|\|`, `\|`) at start of next line instead of end.       |
 | `switchCaseIndent` | boolean | `false`  | Indent `case` pattern arms under the `case` statement.                                |
 | `spaceRedirects`   | boolean | `false`  | Put a space between redirect operators and target (e.g. `> file` instead of `>file`). |
