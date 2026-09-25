@@ -81,18 +81,22 @@ pub struct Configuration {
 
 impl Default for Configuration {
     fn default() -> Self {
+        // NOTE:
+        // Always use defaults from the `shuck-formatter` crate to keep this plugin simple,
+        // even if defaults between shfmt and shuck-formatter differ in the future.
+        let default_shuck = shuck_formatter::ShellFormatOptions::default();
         Self {
             dialect: Dialect::default(),
-            indent_width: 2,
-            use_tabs: false,
-            binary_next_line: false,
-            switch_case_indent: false,
-            space_redirects: false,
-            keep_padding: false,
-            function_next_line: false,
-            never_split: false,
-            simplify: false,
-            minify: false,
+            indent_width: default_shuck.indent_width(),
+            use_tabs: default_shuck.indent_style() == shuck_formatter::IndentStyle::Tab,
+            binary_next_line: default_shuck.binary_next_line(),
+            switch_case_indent: default_shuck.switch_case_indent(),
+            space_redirects: default_shuck.space_redirects(),
+            keep_padding: default_shuck.keep_padding(),
+            function_next_line: default_shuck.function_next_line(),
+            never_split: default_shuck.never_split(),
+            simplify: default_shuck.simplify(),
+            minify: default_shuck.minify(),
         }
     }
 }
