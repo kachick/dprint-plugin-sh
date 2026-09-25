@@ -1,0 +1,30 @@
+{
+  "name": "@kachick/dprint-plugin-sh",
+  "version": "0.1.0",
+  "description": "dprint plugin for Shell formatting using shuck-formatter",
+  "keywords": [
+    "sh",
+    "bash",
+    "shell",
+    "shuck-formatter",
+    "formatter",
+    "dprint",
+    "dprint-plugin"
+  ],
+  "homepage": "https://github.com/kachick/dprint-plugin-sh",
+  "bugs": {
+    "url": "https://github.com/kachick/dprint-plugin-sh/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kachick/dprint-plugin-sh.git"
+  },
+  "license": "MIT",
+  "author": "Kenichi Kamiya <kachick1@gmail.com>",
+  "files": [
+    "plugin.wasm",
+    "schema.json",
+    "LICENSE",
+    "README.md"
+  ]
+}
