@@ -1,5 +1,7 @@
 # dprint-plugin-sh
 
+[![npm version](https://img.shields.io/npm/v/@kachick/dprint-plugin-sh.svg)](https://www.npmjs.com/package/@kachick/dprint-plugin-sh)
+
 [dprint](https://dprint.dev/) WASM plugin for Shell Scripts using [shuck-formatter](https://crates.io/crates/shuck-formatter).
 
 ## Installation
