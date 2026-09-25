@@ -401,6 +401,7 @@ mod tests {
     fn test_format_with_indent_options() {
         let mut handler = ShellPluginHandler;
         let mut config = ConfigKeyMap::new();
+        config.insert("useTabs".to_string(), ConfigKeyValue::Bool(false));
         config.insert("indentWidth".to_string(), ConfigKeyValue::Number(4));
         let resolve_result = handler.resolve_config(config, &GlobalConfiguration::default());
         let cancellation_token = NullCancellationToken;
@@ -462,7 +463,7 @@ mod tests {
         let formatted = handler.format(request, |_| unreachable!()).unwrap();
         assert!(formatted.is_some());
         let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
-        assert_eq!(formatted_str, "if [[ 1 -eq 1 ]]; then\n  echo foo\nfi\n");
+        assert_eq!(formatted_str, "if [[ 1 -eq 1 ]]; then\n\techo foo\nfi\n");
     }
 
     #[test]
@@ -485,7 +486,7 @@ mod tests {
         let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
         assert_eq!(
             formatted_str,
-            "if [[ -f .env ]]; then\n  export FOO=bar\nfi\n"
+            "if [[ -f .env ]]; then\n\texport FOO=bar\nfi\n"
         );
     }
 
@@ -509,7 +510,7 @@ mod tests {
         let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
         assert_eq!(
             formatted_str,
-            "#!/usr/bin/env bash\nif [[ 1 -eq 1 ]]; then\n  echo foo\nfi\n"
+            "#!/usr/bin/env bash\nif [[ 1 -eq 1 ]]; then\n\techo foo\nfi\n"
         );
     }
 
@@ -531,7 +532,7 @@ mod tests {
         let formatted = handler.format(request, |_| unreachable!()).unwrap();
         assert!(formatted.is_some());
         let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
-        assert_eq!(formatted_str, "repeat 2 {\n  print hi\n}\n");
+        assert_eq!(formatted_str, "repeat 2 {\n\tprint hi\n}\n");
     }
 
     #[test]

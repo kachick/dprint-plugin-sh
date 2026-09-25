@@ -14,7 +14,7 @@ mod tests {
                 .unwrap()
                 .starts_with("https://plugins.dprint.dev/kachick/sh/")
         );
-        assert_eq!(schema_value["properties"]["indentWidth"]["default"], 2);
+        assert_eq!(schema_value["properties"]["indentWidth"]["default"], 8);
 
         let validator = jsonschema::validator_for(&schema_value).expect("valid JSON Schema");
 
