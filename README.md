@@ -44,19 +44,35 @@ Customize if necessary
 This plugin directly uses default options from the upstream `shuck-formatter` crate.
 Current defaults are shown below:
 
-| Option             | Type    | Default  | Description                                                                           |
-| ------------------ | ------- | -------- | ------------------------------------------------------------------------------------- |
-| `dialect`          | string  | `"auto"` | Shell dialect: `"auto"`, `"bash"`, `"posix"`, `"mksh"`, `"zsh"`.                      |
-| `indentWidth`      | number  | `8`      | Number of spaces for indent. Inherits global config if not set.                       |
-| `useTabs`          | boolean | `true`   | Indent with tabs. Inherits global config if not set.                                  |
-| `binaryNextLine`   | boolean | `false`  | Put binary operators (`&&`, `\|\|`, `\|`) at start of next line instead of end.       |
-| `switchCaseIndent` | boolean | `false`  | Indent `case` pattern arms under the `case` statement.                                |
-| `spaceRedirects`   | boolean | `false`  | Put a space between redirect operators and target (e.g. `> file` instead of `>file`). |
-| `keepPadding`      | boolean | `false`  | Keep column alignment spaces between tokens.                                          |
-| `functionNextLine` | boolean | `false`  | Put function opening brace `{` on a new line (Allman style).                          |
-| `neverSplit`       | boolean | `false`  | Keep statements on a single line where possible.                                      |
-| `simplify`         | boolean | `false`  | Rewrite redundant syntax to simpler forms (e.g. `${foo}` to `$foo`).                  |
-| `minify`           | boolean | `false`  | Remove comments and extra whitespace to make code small.                              |
+| Option             | Type    | Default  | Description                                                                              |
+| ------------------ | ------- | -------- | ---------------------------------------------------------------------------------------- |
+| `dialect`          | string  | `"auto"` | Shell dialect: `"auto"`, `"bash"`, `"posix"`, `"mksh"`, `"zsh"`.                         |
+| `indentWidth`      | number  | `8`      | Number of spaces for indent. Inherits dprint global config if set, or falls back to `8`. |
+| `useTabs`          | boolean | `true`   | Indent with tabs. Inherits dprint global config if set, or falls back to `true`.         |
+| `binaryNextLine`   | boolean | `false`  | Put binary operators (`&&`, `\|\|`, `\|`) at start of next line instead of end.          |
+| `switchCaseIndent` | boolean | `false`  | Indent `case` pattern arms under the `case` statement.                                   |
+| `spaceRedirects`   | boolean | `false`  | Put a space between redirect operators and target (e.g. `> file` instead of `>file`).    |
+| `keepPadding`      | boolean | `false`  | Keep column alignment spaces between tokens.                                             |
+| `functionNextLine` | boolean | `false`  | Put function opening brace `{` on a new line (Allman style).                             |
+| `neverSplit`       | boolean | `false`  | Keep statements on a single line where possible.                                         |
+| `simplify`         | boolean | `false`  | Rewrite redundant syntax to simpler forms (e.g. `${foo}` to `$foo`).                     |
+| `minify`           | boolean | `false`  | Remove comments and extra whitespace to make code small.                                 |
+
+### Indentation and Global Config
+
+In dprint, top-level settings in `dprint.json` (such as `"indentWidth": 2` and `"useTabs": false`) apply to all plugins by default.
+
+If your project sets global options for other languages (like TypeScript or JSON), this plugin inherits them. If you want shell scripts to keep the standard shfmt style (tabs), override them in the `"sh"` block:
+
+```json
+{
+  "indentWidth": 2,
+  "useTabs": false,
+  "sh": {
+    "useTabs": true
+  }
+}
+```
 
 ### Dialect Resolution
 
