@@ -126,3 +126,8 @@ For example, `.envrc` is a file name, not an extension. So map `"envrc"` to `"ba
 ```
 
 This list satisfies linguist [mapping](https://github.com/github-linguist/linguist/blob/90fe0515940a5192980b2545c33ec59ef9fef17b/lib/linguist/languages.yml#L7468-L7476).
+
+## Acknowledgments
+
+- Thanks to [shuck](https://github.com/ewhauser/shuck) for making it easy to use as a dprint WASM plugin.
+- Thanks to [shfmt](https://github.com/mvdan/sh) for the reference and the original formatter.
