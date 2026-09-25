@@ -86,6 +86,17 @@ Non-shell files such as `Makefile` are not supported.
 
 ## Tips
 
+This plugin simply sets default options like shuck-formatter does.\
+If you want to match shfmt defaults, switch to tabs.
+
+```json
+{
+  "sh": {
+    "useTabs": true
+  }
+}
+```
+
 To format code blocks in markdown, use the `tags` option in the official markdown plugin:
 
 ```bash
