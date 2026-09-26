@@ -96,7 +96,7 @@ When `dialect` is `"auto"` (default), this plugin chooses the dialect in this or
 ### Supported Files
 
 - File extensions: `.sh`, `.bash`, `.zsh`, `.ksh`, `.mksh`, `.dash`, `.bats`
-- File names: `.envrc`, `.bashrc`, `.bash_profile`, `.bash_aliases`, `.bash_logout`, `.profile`, `.zshrc`, `.zshenv`, `.zprofile`, `.zlogin`, `.zlogout`
+- File names: `.envrc`, `.bashrc`, `.bash_profile`, `.bash_login`, `.bash_aliases`, `.bash_logout`, `.profile`, `.zshrc`, `.zshenv`, `.zprofile`, `.zlogin`, `.zlogout`
 
 > [!WARNING]
 > Upstream `shuck-formatter` only infers dialects from shebangs and file extensions, falling back to Bash for extensionless files.
