@@ -4,13 +4,7 @@
   },
   "markdown": {
     "tags": {
-      "nix": "nix",
-      "sh": "sh",
-      "bash": "bash",
-      "zsh": "zsh",
-      "envrc": "bash",
-      "shell": "sh",
-      "shell-script": "sh"
+      "nix": "nix"
     }
   },
   "yaml": {
@@ -21,11 +15,10 @@
   },
   "excludes": ["tests"],
   "plugins": [
-    "npm:@dprint/json@0.25.0",
+    "npm:@dprint/json@0.24.0",
     "npm:@dprint/markdown@0.24.0",
     "npm:@dprint/toml@0.8.0",
     "npm:dprint-plugin-yaml@0.6.0",
-    "npm:@kachick/dprint-plugin-nix@0.1.1",
-    "npm:@kachick/dprint-plugin-sh@0.1.2"
+    "npm:@kachick/dprint-plugin-nix@0.1.1"
   ]
 }
