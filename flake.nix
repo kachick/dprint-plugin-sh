@@ -49,7 +49,6 @@
               diffutils # for E2E test
               nixd
               nixf-diagnose
-              go-task
               typos
               zizmor
 
