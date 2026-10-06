@@ -39,34 +39,28 @@ tasks:
       - cargo test --workspace
   test-e2e:
     deps:
-      - test-e2e-default
-      - test-e2e-all
-      - test-e2e-with_global_config
-      - test-e2e-bash
-      - test-e2e-zsh
-      - test-e2e-envrc
+      - build
+    cmds:
+      - cargo run --package e2e -- check
   test-e2e-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - ./scripts/e2e.bash check '{{.TESTNAME}}'
+      - cargo run --package e2e -- check '{{.TESTNAME}}'
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - ./scripts/e2e.bash bump '{{.TESTNAME}}'
+      - cargo run --package e2e -- bump '{{.TESTNAME}}'
   bump-fixtures:
     deps:
-      - bump-fixtures-default
-      - bump-fixtures-all
-      - bump-fixtures-with_global_config
-      - bump-fixtures-bash
-      - bump-fixtures-zsh
-      - bump-fixtures-envrc
+      - build
+    cmds:
+      - cargo run --package e2e -- bump
   fmt:
     cmds:
       - cargo fmt
