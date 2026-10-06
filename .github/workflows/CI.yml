@@ -14,7 +14,6 @@ on:
       - 'flake.*'
       - '**.rs'
       - 'Cargo.*'
-      - 'Taskfile.yml'
       - 'scripts/**'
       - 'tests/**'
   pull_request:
@@ -25,7 +24,6 @@ on:
       - 'flake.*'
       - '**.rs'
       - 'Cargo.*'
-      - 'Taskfile.yml'
       - 'scripts/**'
       - 'tests/**'
   schedule:
@@ -70,4 +68,4 @@ jobs:
         run: |
           direnv allow .
           direnv export gha > "$GITHUB_ENV"
-      - run: task
+      - run: cargo x default
