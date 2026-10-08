@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@kachick/dprint-plugin-sh.svg)](https://www.npmjs.com/package/@kachick/dprint-plugin-sh) [![CI - Nix Status](https://github.com/kachick/dprint-plugin-sh/actions/workflows/nix.yml/badge.svg?branch=main)](https://github.com/kachick/dprint-plugin-sh/actions/workflows/nix.yml?query=branch%3Amain+)
 
-[dprint](https://dprint.dev/) WASM plugin for Shell Scripts using [shuck-formatter](https://crates.io/crates/shuck-formatter).
+[dprint](https://dprint.dev/) Wasm plugin for Shell Scripts using [shuck-formatter](https://crates.io/crates/shuck-formatter).
 
 ## Installation
 
@@ -139,5 +139,5 @@ This list satisfies linguist [mapping](https://github.com/github-linguist/lingui
 
 ## Acknowledgments
 
-- Thanks to [shuck](https://github.com/ewhauser/shuck) for making it easy to use as a dprint WASM plugin.
+- Thanks to [shuck](https://github.com/ewhauser/shuck) for making it easy to use as a dprint Wasm plugin.
 - Thanks to [shfmt](https://github.com/mvdan/sh) for the reference and the original formatter.
