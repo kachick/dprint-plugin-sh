@@ -53,7 +53,10 @@ fn find_target_file(dir: &Path) -> Option<PathBuf> {
 
     for path in entries {
         if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
-            if file_name.starts_with("expected.") || file_name == ".envrc" {
+            if file_name.starts_with("expected.")
+                || file_name == "expected"
+                || file_name == ".envrc"
+            {
                 return Some(path);
             }
         }
@@ -109,19 +112,18 @@ fn run_check(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
     for dir in test_dirs {
         let target_path = find_target_file(&dir).unwrap_or_else(|| {
             eprintln!(
-                "target file (expected.* or .envrc) not found in {}",
+                "target file (expected.*, expected, or .envrc) not found in {}",
                 dir.display()
             );
             std::process::exit(1);
         });
-        let target_file_name = target_path.file_name().unwrap();
 
         // 1. `dprint check --plugins=<PLUGIN_PATH> <target_file>`
         let status = Command::new("dprint")
             .current_dir(&dir)
             .arg("check")
             .arg(format!("--plugins={}", plugin_path.display()))
-            .arg(target_file_name)
+            .arg(&target_path)
             .status()
             .expect("Failed to run dprint check");
 
@@ -144,7 +146,7 @@ fn run_check(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
             .current_dir(&dir)
             .arg("fmt")
             .arg("--stdin")
-            .arg(target_file_name)
+            .arg(&target_path)
             .arg(format!("--plugins={}", plugin_path.display()))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -184,12 +186,11 @@ fn run_bump(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
     for dir in test_dirs {
         let target_path = find_target_file(&dir).unwrap_or_else(|| {
             eprintln!(
-                "target file (expected.* or .envrc) not found in {}",
+                "target file (expected.*, expected, or .envrc) not found in {}",
                 dir.display()
             );
             std::process::exit(1);
         });
-        let target_file_name = target_path.file_name().unwrap();
 
         let raw_path = find_raw_path(repo_root, &dir);
         let raw_content = fs::read(&raw_path).expect("Failed to read raw file");
@@ -198,7 +199,7 @@ fn run_bump(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
             .current_dir(&dir)
             .arg("fmt")
             .arg("--stdin")
-            .arg(target_file_name)
+            .arg(&target_path)
             .arg(format!("--plugins={}", plugin_path.display()))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

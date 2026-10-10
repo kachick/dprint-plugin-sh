@@ -98,6 +98,20 @@ When `dialect` is `"auto"` (default), this plugin chooses the dialect in this or
 - File extensions: `.sh`, `.bash`, `.zsh`, `.ksh`, `.mksh`, `.dash`, `.bats`
 - File names: `.envrc`, `.bashrc`, `.bash_profile`, `.bash_login`, `.bash_aliases`, `.bash_logout`, `.profile`, `.zshrc`, `.zshenv`, `.zprofile`, `.zlogin`, `.zlogout`
 
+Unix tools often use shell scripts in extensionless files like dotfiles.
+This repository covers some popular file names above, but does not plan to keep adding more default file names.
+When formatting other extensionless scripts for your use case, use dprint's [`shebangs`](https://dprint.dev/config/#shebangs) configuration first:
+
+```json
+{
+  "shebangs": {
+    "#!/bin/sh": "sh",
+    "#!/usr/bin/env bash": "bash",
+    "#!/usr/bin/env zsh": "zsh"
+  }
+}
+```
+
 > [!WARNING]
 > Upstream `shuck-formatter` only infers dialects from shebangs and file extensions, falling back to Bash for extensionless files.
 > This plugin bridges this gap by detecting known Zsh dotfiles (like `.zshrc`) and passing `zsh` dialect upstream.

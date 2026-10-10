@@ -1,0 +1,6 @@
+{
+  "shebangs": {
+    "#!/usr/bin/env bash": "bash"
+  },
+  "sh": {}
+}
