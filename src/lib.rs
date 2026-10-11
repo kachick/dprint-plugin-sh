@@ -206,13 +206,13 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
                 end = (end + 1).min(text.len());
             }
 
-            let start_size = shuck_ast::TextSize::new(
+            let start_size = shuck_formatter::TextSize::new(
                 u32::try_from(start).map_err(|e| FormatError::new(e.to_string()))?,
             );
-            let end_size = shuck_ast::TextSize::new(
+            let end_size = shuck_formatter::TextSize::new(
                 u32::try_from(end).map_err(|e| FormatError::new(e.to_string()))?,
             );
-            let text_range = shuck_ast::TextRange::new(start_size, end_size);
+            let text_range = shuck_formatter::TextRange::new(start_size, end_size);
 
             let range_result = match shuck_formatter::format_range(
                 text,
