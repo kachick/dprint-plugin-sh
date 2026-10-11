@@ -170,10 +170,6 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
         request: SyncFormatRequest<Configuration>,
         _format_with_host: impl FnMut(SyncHostFormatRequest) -> FormatResult,
     ) -> FormatResult {
-        if request.range.is_some() {
-            return Ok(None);
-        }
-
         let text = std::str::from_utf8(&request.file_bytes)?;
 
         let indent_style = if request.config.use_tabs {
@@ -197,12 +193,70 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
             .with_simplify(request.config.simplify)
             .with_minify(request.config.minify);
 
-        match shuck_formatter::format_source(text, Some(request.file_path), &options) {
-            Ok(shuck_formatter::FormattedSource::Formatted(result)) => {
-                Ok(Some(result.into_bytes()))
+        if let Some(range) = request.range {
+            let mut start = range.start.min(text.len());
+            let mut end = range.end.min(text.len());
+            if start > end {
+                start = end;
             }
-            Ok(shuck_formatter::FormattedSource::Unchanged) => Ok(None),
-            Err(err) => Err(FormatError::new(format!("Formatting failed: {err}"))),
+            while !text.is_char_boundary(start) {
+                start = start.saturating_sub(1);
+            }
+            while !text.is_char_boundary(end) {
+                end = (end + 1).min(text.len());
+            }
+
+            let start_size = shuck_formatter::TextSize::new(
+                u32::try_from(start).map_err(|e| FormatError::new(e.to_string()))?,
+            );
+            let end_size = shuck_formatter::TextSize::new(
+                u32::try_from(end).map_err(|e| FormatError::new(e.to_string()))?,
+            );
+            let text_range = shuck_formatter::TextRange::new(start_size, end_size);
+
+            let range_result = match shuck_formatter::format_range(
+                text,
+                text_range,
+                Some(request.file_path),
+                &options,
+            ) {
+                Ok(Some(result)) => result,
+                Ok(None) => return Ok(None),
+                Err(err) => return Err(FormatError::new(format!("Formatting failed: {err}"))),
+            };
+
+            let formatted_content = match range_result.formatted {
+                shuck_formatter::FormattedSource::Formatted(content) => content,
+                shuck_formatter::FormattedSource::Unchanged => return Ok(None),
+            };
+
+            let range_start = usize::from(range_result.range.start());
+            let range_end = usize::from(range_result.range.end());
+
+            if range_start > text.len() || range_end > text.len() || range_start > range_end {
+                return Ok(None);
+            }
+
+            let mut new_text = String::with_capacity(
+                text.len().saturating_sub(range_end - range_start) + formatted_content.len(),
+            );
+            new_text.push_str(&text[..range_start]);
+            new_text.push_str(&formatted_content);
+            new_text.push_str(&text[range_end..]);
+
+            if new_text != text {
+                Ok(Some(new_text.into_bytes()))
+            } else {
+                Ok(None)
+            }
+        } else {
+            match shuck_formatter::format_source(text, Some(request.file_path), &options) {
+                Ok(shuck_formatter::FormattedSource::Formatted(result)) => {
+                    Ok(Some(result.into_bytes()))
+                }
+                Ok(shuck_formatter::FormattedSource::Unchanged) => Ok(None),
+                Err(err) => Err(FormatError::new(format!("Formatting failed: {err}"))),
+            }
         }
     }
 
@@ -365,21 +419,78 @@ mod tests {
     }
 
     #[test]
-    fn test_format_range_returns_none() {
+    fn test_format_range() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let original = "echo   one\necho   two\n";
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.sh"),
+            file_bytes: original.as_bytes().to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: Some(11..22),
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert!(formatted.is_some());
+        let formatted_str = String::from_utf8(formatted.unwrap()).unwrap();
+        assert_eq!(formatted_str, "echo   one\necho two\n");
+    }
+
+    #[test]
+    fn test_format_range_already_formatted_returns_none() {
         let mut handler = ShellPluginHandler;
         let resolve_result =
             handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
         let cancellation_token = NullCancellationToken;
         let request = SyncFormatRequest {
             file_path: &PathBuf::from("test.sh"),
-            file_bytes: b"echo   hello\n".to_vec(),
+            file_bytes: b"echo one\necho two\n".to_vec(),
             config_id: FormatConfigId::from_raw(1),
             config: &resolve_result.config,
-            range: Some(std::ops::Range { start: 0, end: 5 }),
+            range: Some(0..8),
             token: &cancellation_token,
         };
         let formatted = handler.format(request, |_| unreachable!()).unwrap();
         assert_eq!(formatted, None);
+    }
+
+    #[test]
+    fn test_format_range_out_of_bounds_returns_none() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.sh"),
+            file_bytes: b"echo hello\n".to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: Some(100..200),
+            token: &cancellation_token,
+        };
+        let formatted = handler.format(request, |_| unreachable!()).unwrap();
+        assert_eq!(formatted, None);
+    }
+
+    #[test]
+    fn test_format_range_syntax_error() {
+        let mut handler = ShellPluginHandler;
+        let resolve_result =
+            handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        let cancellation_token = NullCancellationToken;
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.sh"),
+            file_bytes: b"if then\n".to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &resolve_result.config,
+            range: Some(0..5),
+            token: &cancellation_token,
+        };
+        let result = handler.format(request, |_| unreachable!());
+        assert!(result.is_err());
     }
 
     #[test]
