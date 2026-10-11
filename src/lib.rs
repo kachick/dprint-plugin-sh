@@ -160,6 +160,7 @@ impl SyncPluginHandler<Configuration> for ShellPluginHandler {
                     ".zlogin".to_string(),
                     ".zlogout".to_string(),
                 ],
+                additive: false,
             },
         }
     }
