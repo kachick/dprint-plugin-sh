@@ -29,7 +29,12 @@ rustPlatform.buildRustPackage (finalAttrs: {
     ];
   };
 
-  cargoLock.lockFile = ./Cargo.lock;
+  cargoLock = {
+    lockFile = ./Cargo.lock;
+    outputHashes = {
+      "shuck-ast-0.2.4" = "sha256-VyA2BBEDIK/PBxUF6ldpMxdMBGwDjWdLu6jQXeAs2KY=";
+    };
+  };
 
   nativeBuildInputs = [
     rustc.llvmPackages.bintools # rust-lld
